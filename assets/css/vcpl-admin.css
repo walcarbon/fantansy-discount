@@ -1,0 +1,266 @@
+/**------------------*
+ * General Style
+ *-------------------*/
+.vcpl-table thead tr th,
+.vcpl-table tr td {
+  padding-left: 15px !important;
+}
+
+.vcpl-delete {
+  color: #da1717 !important;
+  border-color: #da1717 !important;
+}
+
+.vcpl-delete:hover,
+.vcpl-delete:focus,
+.vcpl-delete:active {
+  background: #f0f0f1 !important;
+  border-color: #d63638 !important;
+  color: #d63638 !important;
+}
+
+.form-row > label,
+.form-row .woocommerce-input-wrapper .description,
+tr.hidden {
+  display: none !important;
+}
+
+/**------------------*
+ * Users Page Style
+ *-------------------*/
+
+/** Wp_List_table Users **/
+.vcpl-user-login-table {
+  display: flex;
+  column-gap: 15px;
+}
+
+.vcpl-user-login-table img {
+  object-fit: cover;
+}
+
+.vcpl-back {
+  float: right;
+  font-size: 14px;
+}
+
+.vcpl-order-customer {
+  font-size: 12px;
+  width: 100%;
+  font-weight: 600;
+}
+
+.vcpl-order-total {
+  color: #2271b1;
+  font-weight: 700;
+}
+
+.vcpl-orders-items {
+  margin: 0;
+}
+
+.vcpl-orders-items > li {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.filter_date_label {
+  font-style: italic;
+}
+
+.wp-table-total td {
+  border-top: 1px solid #c3c4c7 !important;
+}
+
+.vcpl-table-c-totals {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2271b1;
+}
+
+.wp-table-total {
+  font-weight: 600;
+}
+
+/** Forms Users **/
+.vcpl-image-profile-wrap {
+  display: flex;
+  align-items: end;
+  column-gap: 5px;
+}
+
+.vcpl-pass-handler {
+  display: flex;
+  column-gap: 5px;
+}
+
+.vcpl-image-profile {
+  width: 95px;
+  height: 95px;
+  object-fit: cover;
+  object-position: center;
+}
+
+#user_pass_field {
+  margin: 0 !important;
+}
+
+[data-dep] {
+  display: none;
+}
+
+.form-row input[type="color"],
+.form-row input[type="date"],
+.form-row input[type="datetime-local"],
+.form-row input[type="datetime"],
+.form-row input[type="email"],
+.form-row input[type="month"],
+.form-row input[type="number"],
+.form-row input[type="password"],
+.form-row input[type="search"],
+.form-row input[type="tel"],
+.form-row input[type="text"],
+.form-row input[type="time"],
+.form-row input[type="url"],
+.form-row input[type="week"],
+.form-row select,
+.form-row textarea {
+  width: 25em !important;
+  padding: 0 5px !important;
+}
+
+.form-row select {
+  height: auto !important;
+}
+
+#pass1 {
+  width: 25em;
+}
+
+.vcpl-customers-table th.vcpl_column.vcpl-column-email {
+  width: 100%;
+}
+
+table.vcpl-customers-tb {
+  max-width: 900px;
+}
+
+th.vcpl_column.vcpl-column-actions {
+  max-width: 100px;
+}
+
+tr.vcpl-form-options td span {
+  font-size: 13px;
+}
+
+.vcpl-customers-remove-info {
+  font-style: italic;
+}
+
+.vcpl-form-field p,
+.vcpl-form-field select {
+  max-width: 100% !important;
+}
+
+.vcpl-form-field .description {
+  font-size: 12px !important;
+}
+
+.vcpl-customers-table td,
+.vcpl-customers-table th {
+  padding: 15px 15px !important;
+}
+
+.vcpl-action-form-options > td {
+  display: flex;
+  column-gap: 20px;
+}
+
+.available_vendors_field {
+  display: inline-block;
+  margin: 0 !important;
+}
+
+.available_vendors_field select {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.vcpl-delete-customer,
+.vcpl-change-vendor {
+  text-align: center;
+}
+
+.vcpl-action-form-options {
+  display: block;
+  padding: 10px 0 !important;
+}
+
+#vcpl_filter_vendor {
+  min-width: 180px;
+  font-size: 18px;
+}
+
+#select2-vcpl_filter_vendor-container {
+  font-size: 14px;
+}
+
+@media (max-width: 782px) {
+  #wp_list_table_anaythics .tablenav .view-switch, .tablenav.top .actions {
+    display: flex !important;
+    margin-bottom: 15px;
+  }
+	
+  #wp_list_table_anaythics .tablenav.top .actions:nth-child( 1 ) {
+    width: 100%;
+    justify-content: space-between;
+    column-gap: 5px;
+  }
+
+  #wp_list_table_anaythics .tablenav.top .actions:nth-child( 2 ),
+  #wp_list_table_anaythics .tablenav.top .actions:nth-child( 3 ) {
+    width: calc( 50% - 8px );
+    float: left;
+    padding: 0;
+  }
+
+  .tablenav .actions select {
+    max-width: 100%;
+    margin: 0 !important;
+    width: 100%;
+  }
+
+  #wp_list_table_anaythics .tablenav.top .actions:nth-child( 2 ) {
+    margin-right: 7.5px;
+  }
+
+  #wp_list_table_anaythics .tablenav.top .actions:nth-child( 3 ) {
+    margin-left: 7.5px;
+  }
+	
+  #wp_list_table_anaythics .tablenav-pages {
+	padding-top: 25px;
+	margin-top: 25px !important;
+	border-top: 1px solid #aaa;
+  }
+	
+  #wp_list_table_anaythics .search-box {
+    padding-bottom: 25px;
+    margin-bottom: 25px !important;
+    border-bottom: 1px solid #aaa;
+  }
+	
+   input#filter_date_before, #filter_date_after {
+    width: 100%;
+  }
+	
+  #wp_list_table_anaythics .wp-table-total td {
+    display:block;
+  }
+	
+  #wp_list_table_anaythics  .wp-table-total td:first-child {
+    display: none;
+  }
+}

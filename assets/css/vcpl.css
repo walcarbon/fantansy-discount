@@ -1,0 +1,300 @@
+/**--------------------*
+ * Myaccount page table
+ *---------------------*/
+.page-title.vcpl-page-title {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+}
+
+.myaccount-table {
+  width: 100%;
+}
+
+.myaccount-table thead th,
+.myaccount-table tbody td {
+  border-bottom: 1px solid #c6c6c6;
+  border-collapse: collapse;
+  padding: 10px;
+  text-align: center;
+}
+
+.myaccount-table tbody td {
+  padding: 15px 10px !important;
+}
+
+.myaccount-table {
+  border: 1px solid #c6c6c6;
+  border-collapse: collapse;
+}
+
+.myaccount-no-items {
+  text-align: center;
+  padding: 20px !important;
+  background-color: #ededed;
+}
+
+.myaccount-table td,
+.myacccount-form label {
+  font-size: 13px;
+}
+
+.myaccount-table .actions {
+  display: flex;
+  column-gap: 10px;
+  justify-content: center;
+}
+
+.myaccount-table td:last-child {
+  border: 0 !important;
+}
+
+/**-------------------*
+ * Myaccount page form
+ *--------------------*/
+.myacccount-form .field-wrap>p {
+  width: calc(50% - 15px);
+}
+
+.myacccount-form .field-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 15px;
+  justify-content: space-between;
+}
+
+.myacccount-form {
+  padding: 15px;
+  border: 1px solid #000;
+}
+
+.vcpl-edit_customer .submit {
+  display: flex;
+  align-items: center;
+  padding-top: 20px;
+}
+
+/**--------------------*
+ * Myaccount page cards
+ *---------------------*/
+.vcpl-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 10px;
+  grid-row-gap: 20px;
+}
+
+.vcpl-card {
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vcpl-card-header h3 {
+  font-size: 18px;
+  margin: 0px;
+  line-height: 1.1em;
+}
+
+.vcpl-card-body p {
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.5em;
+}
+
+.vcpl-card-body strong {
+  font-size: 20px;
+  padding: 10px 0px;
+  display: block;
+}
+
+@media (max-width: 921px) {
+  .woocommerce-MyAccount-navigation ul {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+}
+
+/**--------------------*
+ * Myaccount page Tables
+ *---------------------*/
+.vcpl-analysis-table-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+}
+
+.vcpl-analysis {
+  display: flex;
+  column-gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+  row-gap: 25px;
+}
+
+.vcpl-analysis-table {
+  width: calc(100% / 2 - 20px);
+}
+
+.vcpl-analysis-table-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px;
+  height: 45px;
+}
+
+.vcpl-analysis-table-item:not(:last-child) {
+  border-bottom: 1.6px solid #aaaaaa;
+  border-bottom-style: dotted;
+}
+
+.vcpl-analysis-table {
+  width: calc(50% - 10px);
+}
+
+.vcpl-analysis-table-items {
+  border-left: 2px solid #000;
+  border-bottom: 2px solid #000;
+}
+
+.vcpl-analysis-table-item p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.vcpl-analysis-table-item-info {
+  font-size: 16px !important;
+  font-weight: 800;
+}
+
+.vcpl-analysis-table-item-info span {
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.vcpl-dashboard-btn-wrap {
+  padding: 15px 0;
+  text-align: right;
+  margin-bottom: 20px;
+  display: flex;
+  column-gap: 20px;
+  justify-content: end;
+}
+
+.vcpl-dashboard-info {
+  font-size: 11px;
+  margin-bottom: 25px;
+  display: block;
+}
+
+.vcpl-order-qty {
+  font-weight: 900;
+}
+
+.vcpl-order-customer,
+.vcprofitlos-oreder-date {
+  font-size: 11px;
+}
+
+.vcpl-orders-items {
+  padding-left: 10px;
+}
+
+.vcpl-orders-items>li:not(:last-child) {
+  margin-bottom: 15px;
+}
+
+.woocommerce-MyAccount-content .woocommerce-Button {
+  display: inline-block !important;
+  width: fit-content !important;
+}
+
+.vcpl-analysis-table-title {
+  font-size: 16px !important;
+}
+
+.vcpl-back {
+  font-size: 15px;
+  text-decoration: underline !important;
+  font-weight: 400;
+}
+
+.woocommerce form .show-password-input,
+.woocommerce-page form .show-password-input {
+  position: absolute;
+  right: 0.7em;
+  cursor: pointer;
+  top: 0.7em;
+}
+
+.woocommerce form .show-password-input::after,
+.woocommerce-page form .show-password-input::after {
+  font-family: WooCommerce;
+  font-weight: 400;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  margin-left: 0.618em;
+  content: "\e010" !important;
+  text-decoration: none;
+}
+
+.woocommerce form .password-input,
+.woocommerce-page form .password-input {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.vcpl-analytics-table-filters-wrap {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  column-gap: 15px;
+}
+
+.vcpl-status-select {
+  padding: 0 30px 0 15px !important;
+}
+
+.vcpl-table-analytics {
+  margin-top: 30px !important;
+}
+
+.vcpl-filter-date {
+  display: flex;
+  column-gap: 10px;
+  align-items: center;
+}
+
+.button.js-submit-vcpl {
+  display: flex;
+  align-items: center;
+  padding: 0 !important;
+  justify-content: center;
+  height: 40px;
+  min-width: 100px;
+}
+
+.vcpl-analytics-table-wrap {
+  margin-top: 25px;
+}
+
+.vcpl-table-c-totals {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.vcpl-analytics-table-wrap .woocommerce-orders-table__cell:nth-child(3) {
+  min-width: 190px;
+}
+
+.vcpl-order-customer {
+  display: block;
+  font-weight: 600;
+}

@@ -1,0 +1,2 @@
+# fantansy-discount
+plugin

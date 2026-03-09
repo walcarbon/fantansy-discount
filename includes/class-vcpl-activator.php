@@ -17,5 +17,7 @@ class VCPL_Activator
   // activate the plugin
   public static function activate(): void
   {
+    VCPL_Session_Handler::register_rewrite_endpoints();
+    flush_rewrite_rules();
   }
 }

@@ -146,12 +146,12 @@ if ( !function_exists( 'redirect_if_plugin_active' ) ) {
 
 // We register the plugin activation function.
 register_activation_hook( VCPL_PLUGIN_FILE, function () {
-  //  VCPL_Activator::activate();
+  VCPL_Activator::activate();
 } );
 
 // We register the plugin deactivation function.
 register_deactivation_hook( VCPL_PLUGIN_FILE, function () {
-  //VCPL_Deactivator::deactivate();
+  VCPL_Deactivator::deactivate();
 } );
 
 // We define the function to start the plugin.

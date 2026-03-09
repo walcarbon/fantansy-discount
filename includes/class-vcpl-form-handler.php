@@ -44,6 +44,11 @@ class VCPL_Form_Handler
       return;
     }
 
+    if ( ! $this->can_manage_user_from_context( 0 ) ) {
+      $this->deny_access();
+      return;
+    }
+
     do_action( 'vcpl_save_new_user', $userdata );
 
     $user_id  = wp_insert_user( $userdata );
@@ -81,6 +86,13 @@ class VCPL_Form_Handler
     $userdata = $this->validate_user_action_form( 'edit_profile' );
 
     if ( ! $userdata ) {
+      return;
+    }
+
+    $target_user_id = (int) ( $userdata['ID'] ?? 0 );
+
+    if ( ! $this->can_manage_user_from_context( $target_user_id ) ) {
+      $this->deny_access();
       return;
     }
 
@@ -124,8 +136,18 @@ class VCPL_Form_Handler
       return;
     }
 
+    if ( ! current_user_can( 'delete_users' ) || ( is_admin() && ! current_user_can( 'manage_options' ) ) ) {
+      $this->deny_access();
+      return;
+    }
+
     $notices = array();
     foreach ( array_map( 'intval', vcpl_get_var( 'user_id', array(), 'post' ) ) as $user_id ) {
+
+      if ( ! $this->can_manage_user_from_context( $user_id ) ) {
+        $this->deny_access();
+        return;
+      }
 
       if ( vcpl_get_var( 'actions-before-delete' )[$user_id] ?? strval( false ) === 'delete_all' ) {
         $arr = array_merge( array( $user_id ), get_user_meta( $user_id, 'customers', true ) ?: array() );
@@ -139,9 +161,7 @@ class VCPL_Form_Handler
 
         $user = get_userdata( $id );
 
-        if ( current_user_can( 'delete_users' ) ) {
-          $is_error = wp_delete_user( $id );
-        }
+        $is_error = wp_delete_user( $id );
 
         $notices = array_merge( $notices, array( array(
           'type'   => ! $is_error ? 'error' : 'success',
@@ -164,6 +184,43 @@ class VCPL_Form_Handler
       wp_safe_redirect( remove_query_arg( array( 'action', 'user_id' ) ) );
     }
 
+  }
+
+
+  private function deny_access( string $message = '' ): void
+  {
+    $notice = $message ?: __( 'You are not allowed to perform this action.', VCPL_TEXT_DOMAIN );
+
+    if ( is_admin() ) {
+      $this->notice_form( array( 'type' => 'error', 'notice' => $notice ) );
+    } else {
+      wc_add_notice( $notice, 'error' );
+      wp_safe_redirect( vcpl_get_var( '_wp_http_referer' ) ?: remove_query_arg( array( 'action', 'user_id' ) ) );
+      exit;
+    }
+  }
+
+  private function can_manage_user_from_context( int $user_id ): bool
+  {
+    if ( is_admin() ) {
+      return current_user_can( 'manage_options' );
+    }
+
+    $current_user = wp_get_current_user();
+
+    if ( ! is_user_logged_in() || ! in_array( 'vendor', $current_user->roles ?: array(), true ) ) {
+      return false;
+    }
+
+    if ( $user_id <= 0 ) {
+      return true;
+    }
+
+    if ( (int) get_user_meta( $user_id, 'vendor', true ) === (int) $current_user->ID ) {
+      return true;
+    }
+
+    return in_array( $user_id, array_map( fn( $customer ) => (int) $customer->ID, vcpl_get_my_customers( $current_user->ID ) ?: array() ), true );
   }
 
   /**

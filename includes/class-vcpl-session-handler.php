@@ -97,13 +97,15 @@ class VCPL_Session_Handler {
 		}
 	}
 
-	// Add custom endpoints to my account page.
-	public function add_endpoints() {
-
+	public static function register_rewrite_endpoints(): void {
 		add_rewrite_endpoint( 'customers', EP_ROOT | EP_PAGES );
 		add_rewrite_endpoint( 'orders_vendor', EP_ROOT | EP_PAGES );
 		add_rewrite_endpoint( 'analytics', EP_ROOT | EP_PAGES );
-		flush_rewrite_rules();
+	}
+
+	// Add custom endpoints to my account page.
+	public function add_endpoints() {
+		self::register_rewrite_endpoints();
 	}
 
 	/**
@@ -675,11 +677,19 @@ class VCPL_Session_Handler {
 	 */
 
 	public function change_checkout_customer_id( int $customer_id ): int {
+		if ( ! is_user_logged_in() || ! in_array( 'vendor', wp_get_current_user()->roles ?: array(), true ) ) {
+			return $customer_id;
+		}
+
 		if ( isset( $_POST['customer_order'] ) ) {
 			$customer_id_to_asign = intval( $_POST['customer_order'] );
 
 			if ( $customer_id_to_asign > 0 ) {
-				return $customer_id_to_asign;
+				$allowed_customer_ids = array_map( fn( $customer ) => (int) $customer->ID, vcpl_get_my_customers( wp_get_current_user()->ID ) ?: array() );
+
+				if ( in_array( $customer_id_to_asign, $allowed_customer_ids, true ) ) {
+					return $customer_id_to_asign;
+				}
 			}
 		}
 

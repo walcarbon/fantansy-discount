@@ -12,13 +12,24 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 global $plugin_page;
 
-if ( ! session_id() ) session_start();
+$notice = false;
 
-$notice = vcpl_get_var_array( 'notice', $_SESSION );
+if ( session_id() ) {
+  $notice = vcpl_get_var_array( 'notice', $_SESSION );
+} elseif ( ! headers_sent() ) {
+  @session_start();
+
+  if ( session_id() ) {
+    $notice = vcpl_get_var_array( 'notice', $_SESSION );
+  }
+}
 
 if ( $notice ) {
   echo $notice;
-  unset( $_SESSION['notice'] );
+
+  if ( session_id() ) {
+    unset( $_SESSION['notice'] );
+  }
 }
 
 $user_table = new ( 'Includes\Admin\List_Tables\VCPL_Admin_List_Table_' . ucwords( VCPL()->get_current_user_page() ) )();

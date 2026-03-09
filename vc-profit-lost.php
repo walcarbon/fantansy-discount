@@ -132,26 +132,33 @@ if ( !function_exists( '_is_woocommerce_installed' ) ) {
 if ( !function_exists( 'redirect_if_plugin_active' ) ) {
   function redirect_if_plugin_active()
   {
-    $protocol = is_ssl() ? 'https://' : 'http://';
-    $current_url = $protocol . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ];
-    $install_url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=woocommerce' ), 'install-plugin_woocommerce' );
+    if ( ! is_admin() || ! current_user_can( 'activate_plugins' ) ) {
+      return;
+    }
 
-    if ($current_url == $install_url && is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-      wp_redirect( admin_url( 'plugins.php' ) );
+    global $pagenow;
+
+    $is_woo_install_request = 'update.php' === $pagenow
+      && 'install-plugin' === vcpl_get_var( 'action', false, 'get' )
+      && 'woocommerce' === vcpl_get_var( 'plugin', false, 'get' );
+
+    if ( $is_woo_install_request && is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+      wp_safe_redirect( admin_url( 'plugins.php' ) );
       exit;
     }
-    add_action( 'admin_init', 'redirect_if_plugin_active' );
   }
+
+  add_action( 'admin_init', 'redirect_if_plugin_active' );
 }
 
 // We register the plugin activation function.
 register_activation_hook( VCPL_PLUGIN_FILE, function () {
-  //  VCPL_Activator::activate();
+  VCPL_Activator::activate();
 } );
 
 // We register the plugin deactivation function.
 register_deactivation_hook( VCPL_PLUGIN_FILE, function () {
-  //VCPL_Deactivator::deactivate();
+  VCPL_Deactivator::deactivate();
 } );
 
 // We define the function to start the plugin.

@@ -304,7 +304,7 @@ class VCPL_Admin_List_Table_Analytics_Vendor extends \WP_List_Table {
 			'order'       => __( 'Order', 'vcpl-text-domain' ),
 			'order_total' => __( 'Order Total', 'vcpl-text-domain' ),
 			'commission'  => __( 'Commission (%)', 'vcpl-text-domain' ),
-			'profit'      => __( 'Profit', 'vcpl-text-domain' ),
+			'profit'      => __( 'Commission Amount', 'vcpl-text-domain' ),
 		);
 	}
 
@@ -328,11 +328,14 @@ class VCPL_Admin_List_Table_Analytics_Vendor extends \WP_List_Table {
         $column_count = count($columns);
 		?>
         <tr class="wp-table-total" style="font-weight: bold;">
-            <td colspan="<?php echo $column_count - 2; ?>">
+            <td colspan="<?php echo max( 1, $column_count - 3 ); ?>">
                 <?php _e( 'Totals for all filtered results:', 'vcpl-text-domain' ); ?>
             </td>
             <td>
                 <?php echo wc_price( $this->total_amount ); ?>
+            </td>
+            <td>
+                &mdash;
             </td>
             <td>
                 <?php echo wc_price( $this->total_profit ); ?>

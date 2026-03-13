@@ -13,11 +13,19 @@ defined( 'ABSPATH' ) || exit;
 if ( !defined( 'VCPL_PLUGIN_PATH' ) ) define( 'VCPL_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/' );
 
 
-// Register the autoload function, if it's not already registered
+// Register the autoload function, if it's not already registered.
+// Keep the legacy misspelled function name for backwards compatibility.
+if ( !function_exists( 'vcpl_autoload' ) ) {
+  function vcpl_autoload()
+  {
+    spl_autoload_register( 'vcpl_plugin_autoload' );
+  }
+}
+
 if ( !function_exists( 'vcpl_autolaod' ) ) {
   function vcpl_autolaod()
   {
-    spl_autoload_register( 'vcpl_plugin_autoload' );
+    vcpl_autoload();
   }
 }
 
@@ -81,4 +89,4 @@ if ( !function_exists( 'vcpl_plugin_autoload' ) ) {
   }
 }
 
-vcpl_autolaod();
+vcpl_autoload();

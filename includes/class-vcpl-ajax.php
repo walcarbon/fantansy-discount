@@ -21,6 +21,10 @@ class VCPL_Ajax
 
     check_ajax_referer( 'vcpl_nonce', 'nonce' );
 
+    if ( ! current_user_can( 'delete_users' ) ) {
+      wp_send_json_error( array( 'message' => __( 'You are not allowed to perform this action.', VCPL_TEXT_DOMAIN ) ), 403 );
+    }
+
     if ( isset( $_POST[ 'action' ] ) ) {
 
       $args_user_id = array(
@@ -30,6 +34,19 @@ class VCPL_Ajax
       );
 
       extract( $args_user_id, EXTR_OVERWRITE );
+
+      $current_user_id = (int) get_current_user_id();
+      $is_admin        = current_user_can( 'manage_options' );
+
+      if ( ! $is_admin && $current_vendor_id !== $current_user_id ) {
+        wp_send_json_error( array( 'message' => __( 'You are not allowed to manage this vendor.', VCPL_TEXT_DOMAIN ) ), 403 );
+      }
+
+      foreach ( $customer_id as $id ) {
+        if ( (int) get_user_meta( (int) $id, 'vendor', true ) !== (int) $current_vendor_id ) {
+          wp_send_json_error( array( 'message' => __( 'You are not allowed to manage one or more selected customers.', VCPL_TEXT_DOMAIN ) ), 403 );
+        }
+      }
 
       wp_send_json( array(
         'output'           => sprintf(

@@ -41,13 +41,15 @@ class VCPL_Session_Handler {
 		$user = wp_get_current_user();
 		if ( is_page( 'my-account' ) && is_user_logged_in() ) {
 			if ( in_array( 'shop_manager', $user->roles ) ) {
-				wp_redirect( home_url( '/frontend-manager' ) );
+				wp_safe_redirect( home_url( '/frontend-manager' ) );
+				exit;
 			}
 		}
 
 		if ( is_page( 'frontend-manager' ) && is_user_logged_in() ) {
 			if ( ! in_array( 'shop_manager', $user->roles ) ) {
-				wp_redirect( home_url( '/' ) );
+				wp_safe_redirect( home_url( '/' ) );
+				exit;
 			}
 		}
 	}
@@ -60,7 +62,7 @@ class VCPL_Session_Handler {
 			$roles = array_merge( self::CUSTOMER_ROLES, array( 'shop_manager', 'vendor', 'administrator' ) );
 
 			if ( empty( array_intersect( $roles, $user->roles ) ) ) {
-				wp_redirect( home_url( '/' ) );
+				wp_safe_redirect( home_url( '/' ) );
 				exit;
 			}
 		}
@@ -97,13 +99,15 @@ class VCPL_Session_Handler {
 		}
 	}
 
-	// Add custom endpoints to my account page.
-	public function add_endpoints() {
-
+	public static function register_rewrite_endpoints(): void {
 		add_rewrite_endpoint( 'customers', EP_ROOT | EP_PAGES );
 		add_rewrite_endpoint( 'orders_vendor', EP_ROOT | EP_PAGES );
 		add_rewrite_endpoint( 'analytics', EP_ROOT | EP_PAGES );
-		flush_rewrite_rules();
+	}
+
+	// Add custom endpoints to my account page.
+	public function add_endpoints() {
+		self::register_rewrite_endpoints();
 	}
 
 	/**
@@ -142,7 +146,7 @@ class VCPL_Session_Handler {
 			}
 
 			if ( is_wc_endpoint_url( 'downloads' ) || is_wc_endpoint_url( 'orders' ) || is_wc_endpoint_url( 'edit-address' ) ) {
-				wp_redirect( home_url( '/my-account' ) );
+				wp_safe_redirect( home_url( '/my-account' ) );
 				exit;
 			}
 		}
@@ -675,15 +679,33 @@ class VCPL_Session_Handler {
 	 */
 
 	public function change_checkout_customer_id( int $customer_id ): int {
+		if ( ! is_user_logged_in() || ! in_array( 'vendor', wp_get_current_user()->roles ?: array(), true ) ) {
+			return $customer_id;
+		}
+
 		if ( isset( $_POST['customer_order'] ) ) {
 			$customer_id_to_asign = intval( $_POST['customer_order'] );
 
 			if ( $customer_id_to_asign > 0 ) {
-				return $customer_id_to_asign;
+				$allowed_customer_ids = array_map( fn( $customer ) => (int) $customer->ID, vcpl_get_my_customers( wp_get_current_user()->ID ) ?: array() );
+
+				if ( in_array( $customer_id_to_asign, $allowed_customer_ids, true ) ) {
+					return $customer_id_to_asign;
+				}
 			}
 		}
 
 		return $customer_id;
+	}
+
+	/**
+	 * Keep the login-required message stable for WooCommerce protected pages.
+	 *
+	 * @param  string $message Existing message from WooCommerce.
+	 * @return string
+	 */
+	public function change_login_required_message( string $message ): string {
+		return $message;
 	}
 
 	/**
@@ -716,7 +738,7 @@ class VCPL_Session_Handler {
 			$user     = get_userdata( $order->get_customer_id() );
 
 			wc_add_notice( "Order's <strong>{$user->user_login}</strong> has been successfull." );
-			wp_redirect( wc_get_endpoint_url( 'orders_vendor', strval( false ), wc_get_page_permalink( 'myaccount' ) ) );
+			wp_safe_redirect( wc_get_endpoint_url( 'orders_vendor', strval( false ), wc_get_page_permalink( 'myaccount' ) ) );
 			exit;
 		}
 	}

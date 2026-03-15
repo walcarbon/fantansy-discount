@@ -12,13 +12,24 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 global $plugin_page;
 
-if ( ! session_id() ) session_start();
+$notice = false;
 
-$notice = vcpl_get_var_array( 'notice', $_SESSION );
+if ( session_id() ) {
+  $notice = vcpl_get_var_array( 'notice', $_SESSION );
+} elseif ( ! headers_sent() ) {
+  @session_start();
+
+  if ( session_id() ) {
+    $notice = vcpl_get_var_array( 'notice', $_SESSION );
+  }
+}
 
 if ( $notice ) {
   echo $notice;
-  unset( $_SESSION['notice'] );
+
+  if ( session_id() ) {
+    unset( $_SESSION['notice'] );
+  }
 }
 
 $user_table = new ( 'Includes\Admin\List_Tables\VCPL_Admin_List_Table_' . ucwords( VCPL()->get_current_user_page() ) )();
@@ -58,7 +69,7 @@ foreach ( VCPL()->get_current_user_id_action_page() as $user_id ) {
       <a href="<?= add_query_arg( 'action', 'add_user', menu_page_url( VCPL()->get_current_user_page(), false ) ); ?>" class="page-title-action"> <?= __( 'Add New ' . VCPL()->get_current_user_page_args()['title'], VCPL_TEXT_DOMAIN ); ?></a>
     </h2>
 
-    <form method='post' name='vcpl_search_<?= VCPL()->get_current_user_page(); ?>' action='<?= $_SERVER['PHP_SELF']; ?>?page=<?= VCPL()->get_current_user_page(); ?>'>
+    <form method='post' name='vcpl_search_<?= VCPL()->get_current_user_page(); ?>' action='<?= esc_url( add_query_arg( 'page', VCPL()->get_current_user_page(), menu_page_url( VCPL()->get_current_user_page(), false ) ) ); ?>'>
       <?php $user_table->prepare_items(); ?>
       <?php $user_table->views(); ?>
       <?php $user_table->search_box( 'Search', 'search_' . VCPL()->get_current_user_page() ); ?>

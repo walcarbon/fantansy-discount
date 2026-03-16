@@ -13,7 +13,7 @@
  * Plugin Name: Vc Profit Lost
  * Plugin URI:
  * Description: Addons for the Woocommerce plugin. Manage your store by creating sellers and getting a profit and loss report.
- * Version: 1.0.0
+ * Version: 1.0.0.4
  * Requires at least: 5.2
  * Requires PHP:7.2
  * Author: Santil Darwin
@@ -36,7 +36,7 @@ if ( !defined( 'VCPL_TEXT_DOMAIN' ) ) {
 }
 
 // We define the plugin version.
-if ( !defined( 'VCPL_VERSION' ) ) define( 'VCPL_VERSION', '1.0.0' );
+if ( !defined( 'VCPL_VERSION' ) ) define( 'VCPL_VERSION', '1.0.0.4' );
 
 // We define the plugin file path.
 if ( !defined( 'VCPL_PLUGIN_FILE' ) ) define( 'VCPL_PLUGIN_FILE', __FILE__ );
@@ -132,26 +132,36 @@ if ( !function_exists( '_is_woocommerce_installed' ) ) {
 if ( !function_exists( 'redirect_if_plugin_active' ) ) {
   function redirect_if_plugin_active()
   {
-    $protocol = is_ssl() ? 'https://' : 'http://';
-    $current_url = $protocol . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ];
-    $install_url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=woocommerce' ), 'install-plugin_woocommerce' );
+    if ( ! is_admin() || ! current_user_can( 'activate_plugins' ) ) {
+      return;
+    }
 
-    if ($current_url == $install_url && is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-      wp_redirect( admin_url( 'plugins.php' ) );
+    global $pagenow;
+
+    $action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+    $plugin = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : '';
+
+    $is_woo_install_request = 'update.php' === $pagenow
+      && 'install-plugin' === $action
+      && 'woocommerce' === $plugin;
+
+    if ( $is_woo_install_request && is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+      wp_safe_redirect( admin_url( 'plugins.php' ) );
       exit;
     }
-    add_action( 'admin_init', 'redirect_if_plugin_active' );
   }
+
+  add_action( 'admin_init', 'redirect_if_plugin_active' );
 }
 
 // We register the plugin activation function.
 register_activation_hook( VCPL_PLUGIN_FILE, function () {
-  //  VCPL_Activator::activate();
+  VCPL_Activator::activate();
 } );
 
 // We register the plugin deactivation function.
 register_deactivation_hook( VCPL_PLUGIN_FILE, function () {
-  //VCPL_Deactivator::deactivate();
+  VCPL_Deactivator::deactivate();
 } );
 
 // We define the function to start the plugin.
@@ -163,4 +173,3 @@ if ( ! function_exists( 'vcpl_run_plugin' ) ) {
   }
 
 }
-

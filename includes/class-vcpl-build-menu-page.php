@@ -141,7 +141,18 @@ class VCPL_Build_Menu_Page
   public function run(): void
   {
     foreach ( $this->menus as $menu ) {
-      extract( $menu, EXTR_OVERWRITE );
+      $page_title = $menu['page_title'] ?? '';
+      $menu_title = $menu['menu_title'] ?? '';
+      $capability = $menu['capability'] ?? '';
+      $menu_slug  = $menu['menu_slug'] ?? '';
+      $args       = $menu['args'] ?? array();
+      $icon_url   = $menu['icon_url'] ?? '';
+      $position   = intval( $menu['position'] ?? 0 );
+
+      if ( ! is_string( $page_title ) || ! is_string( $menu_title ) || ! is_string( $capability ) || ! is_string( $menu_slug ) || ! is_array( $args ) ) {
+        continue;
+      }
+
       add_menu_page(
         $page_title,
         $menu_title,
@@ -156,7 +167,17 @@ class VCPL_Build_Menu_Page
     }
 
     foreach ( $this->submenus as $submenu ) {
-      extract( $submenu, EXTR_OVERWRITE );
+      $parent_slug = $submenu['parent_slug'] ?? '';
+      $page_title  = $submenu['page_title'] ?? '';
+      $menu_title  = $submenu['menu_title'] ?? '';
+      $capability  = $submenu['capability'] ?? '';
+      $menu_slug   = $submenu['menu_slug'] ?? '';
+      $args        = $submenu['args'] ?? array();
+
+      if ( ! is_string( $parent_slug ) || ! is_string( $page_title ) || ! is_string( $menu_title ) || ! is_string( $capability ) || ! is_string( $menu_slug ) || ! is_array( $args ) ) {
+        continue;
+      }
+
       add_submenu_page(
         $parent_slug,
         $page_title,

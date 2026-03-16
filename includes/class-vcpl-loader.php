@@ -95,12 +95,30 @@ class VCPL_Loader
   public function run(): void
   {
     foreach ( $this->actions as $action ) {
-      extract( $action, EXTR_OVERWRITE );
+      $hook          = $action['hook'] ?? '';
+      $component     = $action['component'] ?? null;
+      $callback      = $action['callback'] ?? '';
+      $priority      = intval( $action['priority'] ?? 10 );
+      $accepted_args = intval( $action['accepted_args'] ?? 1 );
+
+      if ( ! is_string( $hook ) || '' === $hook || ! is_object( $component ) || ! is_string( $callback ) || '' === $callback ) {
+        continue;
+      }
+
       add_action( $hook, array( $component, $callback ), $priority, $accepted_args );
     }
 
     foreach ( $this->filters as $filter ) {
-      extract( $filter, EXTR_OVERWRITE );
+      $hook          = $filter['hook'] ?? '';
+      $component     = $filter['component'] ?? null;
+      $callback      = $filter['callback'] ?? '';
+      $priority      = intval( $filter['priority'] ?? 10 );
+      $accepted_args = intval( $filter['accepted_args'] ?? 1 );
+
+      if ( ! is_string( $hook ) || '' === $hook || ! is_object( $component ) || ! is_string( $callback ) || '' === $callback ) {
+        continue;
+      }
+
       add_filter( $hook, array( $component, $callback ), $priority, $accepted_args );
     }
   }

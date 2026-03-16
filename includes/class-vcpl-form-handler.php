@@ -44,6 +44,18 @@ class VCPL_Form_Handler
       return;
     }
 
+    if ( ! $this->can_manage_user_from_context( 0 ) || ! $this->current_user_can_manage_target( 0, 'create' ) ) {
+      $this->deny_access();
+      return;
+    }
+
+    $userdata = $this->normalize_create_userdata( $userdata );
+
+    if ( false === $userdata ) {
+      $this->deny_access();
+      return;
+    }
+
     do_action( 'vcpl_save_new_user', $userdata );
 
     $user_id  = wp_insert_user( $userdata );
@@ -84,6 +96,15 @@ class VCPL_Form_Handler
       return;
     }
 
+    $target_user_id = (int) ( $userdata['ID'] ?? 0 );
+
+    if ( ! $this->can_manage_user_from_context( $target_user_id ) || ! $this->current_user_can_manage_target( $target_user_id, 'edit' ) ) {
+      $this->deny_access();
+      return;
+    }
+
+    $userdata = $this->normalize_update_userdata( $userdata );
+
     do_action( 'vcpl_update_profile', $userdata );
 
     $user_id  = wp_update_user( $userdata );
@@ -104,6 +125,7 @@ class VCPL_Form_Handler
     } else {
       wc_add_notice( $notice_message, $notice_type  );
       wp_safe_redirect( vcpl_get_var( '_wp_http_referer' ) );
+      exit;
     }
 
   }
@@ -124,11 +146,28 @@ class VCPL_Form_Handler
       return;
     }
 
+    if ( ! current_user_can( 'delete_users' ) ) {
+      $this->deny_access();
+      return;
+    }
+
+    $delete_ids = array_values( array_filter( array_map( 'intval', (array) vcpl_get_var( 'user_id', array(), 'post' ) ) ) );
+
+    if ( empty( $delete_ids ) || ! $this->validate_delete_targets( $delete_ids ) ) {
+      $this->deny_access();
+      return;
+    }
+
     $notices = array();
-    foreach ( array_map( 'intval', vcpl_get_var( 'user_id', array(), 'post' ) ) as $user_id ) {
+    foreach ( $delete_ids as $user_id ) {
 
       if ( vcpl_get_var( 'actions-before-delete' )[$user_id] ?? strval( false ) === 'delete_all' ) {
         $arr = array_merge( array( $user_id ), get_user_meta( $user_id, 'customers', true ) ?: array() );
+
+        if ( ! $this->validate_delete_targets( array_values( array_filter( array_map( 'intval', $arr ) ) ) ) ) {
+          $this->deny_access();
+          return;
+        }
       }
 
       if ( trim( implode( '', get_userdata( ( int ) $user_id )->roles ) ) === 'cbv' ) {
@@ -139,9 +178,7 @@ class VCPL_Form_Handler
 
         $user = get_userdata( $id );
 
-        if ( current_user_can( 'delete_users' ) ) {
-          $is_error = wp_delete_user( $id );
-        }
+        $is_error = wp_delete_user( $id );
 
         $notices = array_merge( $notices, array( array(
           'type'   => ! $is_error ? 'error' : 'success',
@@ -162,8 +199,125 @@ class VCPL_Form_Handler
         wc_add_notice( $notice['notice'], $notice['type'] );
       }
       wp_safe_redirect( remove_query_arg( array( 'action', 'user_id' ) ) );
+      exit;
     }
 
+  }
+
+
+  private function deny_access( string $message = '' ): void
+  {
+    $notice = $message ?: __( 'You are not allowed to perform this action.', VCPL_TEXT_DOMAIN );
+
+    if ( is_admin() ) {
+      $this->notice_form( array( 'type' => 'error', 'notice' => $notice ) );
+    } else {
+      wc_add_notice( $notice, 'error' );
+      wp_safe_redirect( vcpl_get_var( '_wp_http_referer' ) ?: remove_query_arg( array( 'action', 'user_id' ) ) );
+      exit;
+    }
+  }
+
+
+
+  private function is_admin_context(): bool
+  {
+    return is_admin() && current_user_can( 'manage_options' );
+  }
+
+  private function get_vendor_customer_ids( int $vendor_id ): array
+  {
+    return array_values( array_filter( array_map( 'intval', array_map( fn( $customer ) => $customer->ID ?? 0, vcpl_get_my_customers( $vendor_id ) ?: array() ) ) ) );
+  }
+
+  private function can_manage_user_from_context( int $user_id ): bool
+  {
+    if ( $this->is_admin_context() ) {
+      return true;
+    }
+
+    $current_user = wp_get_current_user();
+
+    if ( ! is_user_logged_in() || ! in_array( 'vendor', $current_user->roles ?: array(), true ) ) {
+      return false;
+    }
+
+    if ( $user_id <= 0 ) {
+      return true;
+    }
+
+    if ( (int) get_user_meta( $user_id, 'vendor', true ) === (int) $current_user->ID ) {
+      return true;
+    }
+
+    return in_array( $user_id, $this->get_vendor_customer_ids( (int) $current_user->ID ), true );
+  }
+
+  private function current_user_can_manage_target( int $user_id, string $action ): bool
+  {
+    if ( $user_id <= 0 ) {
+      if ( 'create' === $action && ! $this->is_admin_context() ) {
+        return is_user_logged_in() && in_array( 'vendor', wp_get_current_user()->roles ?: array(), true );
+      }
+
+      return current_user_can( 'create_users' );
+    }
+
+    if ( ! $this->is_admin_context() ) {
+      return is_user_logged_in() && in_array( 'vendor', wp_get_current_user()->roles ?: array(), true );
+    }
+
+    $capability = match ( $action ) {
+      'delete' => 'delete_user',
+      default  => 'edit_user',
+    };
+
+    return current_user_can( $capability, $user_id );
+  }
+
+  private function normalize_create_userdata( array $userdata ): array|false
+  {
+    if ( $this->is_admin_context() ) {
+      return $userdata;
+    }
+
+    $current_user_id = (int) get_current_user_id();
+
+    if ( ! is_user_logged_in() || ! in_array( 'vendor', wp_get_current_user()->roles ?: array(), true ) ) {
+      return false;
+    }
+
+    if ( ( $userdata['role'] ?? '' ) !== 'cbv' ) {
+      return false;
+    }
+
+    $userdata['vendor'] = $current_user_id;
+
+    return $userdata;
+  }
+
+
+  private function normalize_update_userdata( array $userdata ): array
+  {
+    if ( $this->is_admin_context() ) {
+      return $userdata;
+    }
+
+    $userdata['role']   = 'cbv';
+    $userdata['vendor'] = (int) get_current_user_id();
+
+    return $userdata;
+  }
+
+  private function validate_delete_targets( array $user_ids ): bool
+  {
+    foreach ( $user_ids as $user_id ) {
+      if ( ! $this->current_user_can_manage_target( $user_id, 'delete' ) || ! $this->can_manage_user_from_context( $user_id ) ) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -297,12 +451,12 @@ class VCPL_Form_Handler
    */
   private function notice_form( array $args, string | null $http_referer = null, bool $multi_notice = false ): void
   {
-    if ( ! session_id() ){
-      session_start();
-    }
-
     if ( empty( $args ) ) {
       return;
+    }
+
+    if ( ! session_id() && ! headers_sent() ) {
+      @session_start();
     }
 
     $formmatter = fn( array $notice )=> sprintf(
@@ -311,9 +465,12 @@ class VCPL_Form_Handler
       $notice['notice']
     );
 
-    $_SESSION['notice'] = $multi_notice
-      ? implode( ' ', array_map( fn( array $notice ) => $formmatter( $notice ), $args ) )
-      : $formmatter( $args );
+    if ( session_id() ) {
+      $_SESSION['notice'] = $multi_notice
+        ? implode( ' ', array_map( fn( array $notice ) => $formmatter( $notice ), $args ) )
+        : $formmatter( $args );
+    }
+
     wp_safe_redirect( $http_referer ?? vcpl_get_var( '_wp_http_referer' ) );
     exit;
 

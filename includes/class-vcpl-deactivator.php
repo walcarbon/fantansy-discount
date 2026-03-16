@@ -14,6 +14,6 @@ class VCPL_Deactivator
   // Deactivate the plugin
   public static function deactivate() : void
   {
-    // Do nothing
+    flush_rewrite_rules();
   }
 }

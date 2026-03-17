@@ -19,6 +19,8 @@ if ( $user_id !== 0 && ! vcpl_user_exists( ( int ) $user_id ) ) {
 
 $user = get_userdata( $user_id );
 
+$my_account_customers_url = wc_get_endpoint_url( 'customers', '', wc_get_page_permalink( 'myaccount' ) );
+
 ?>
 
 <div class="wrap">
@@ -66,16 +68,18 @@ $user = get_userdata( $user_id );
 
         <?php do_action( 'vcprfitlost_before_' . $current_action ); ?>
 
-        <a href="<?= wc_get_page_permalink( 'myaccount' ) . 'customers'; ?>" class="vcpl-back"><?= esc_html__( 'Back to List', VCPL_TEXT_DOMAIN ); ?></a>
+        <a href="<?= esc_url( $my_account_customers_url ); ?>" class="vcpl-back"><?= esc_html__( 'Back to List', VCPL_TEXT_DOMAIN ); ?></a>
       </h2>
-       <form method="post" autocomplete="off" class="myacccount-form woocommerce-form vcpl-<?= $current_action; ?>" action="">
+       <form method="post" autocomplete="off" class="myacccount-form woocommerce-form vcpl-<?= esc_attr( $current_action ); ?>" action="">
         <?php if ( $user ) : ?>
           <h3><?= esc_html__( ucfirst( str_replace( '_user', '', $current_action ) ) . ' ' . $user->user_login, VCPL_TEXT_DOMAIN ); ?></h3>
           <p><?= esc_html__( 'Edit the customer details below.', VCPL_TEXT_DOMAIN ); ?></p>
         <?php endif; ?>
-        <input type="hidden" name="action" value="<?= VCPL()->get_current_action_page(); ?>">
-        <input type="hidden" name="role"   value="cbv">
-        <input type="hidden" name="vendor"   value="<?= wp_get_current_user()->ID; ?>">
+        <input type="hidden" name="action" value="<?= esc_attr( VCPL()->get_current_action_page() ); ?>">
+        <?php if ( in_array( $current_action, array( 'add_user', 'edit_user' ), true ) ) : ?>
+          <input type="hidden" name="role" value="cbv">
+          <input type="hidden" name="vendor" value="<?= esc_attr( wp_get_current_user()->ID ); ?>">
+        <?php endif; ?>
         <?php wp_nonce_field( 'vcpl_' . $nonce_action , 'vcpl_' . $nonce_action . '_nonce' ); ?>
         <div class="field-wrap" >
           <?= $fields; ?>
@@ -87,7 +91,7 @@ $user = get_userdata( $user_id );
 
     <?php else : ?>
 
-        <a href="<?= add_query_arg( array( 'action' => 'add_user' ) ); ?>" class="woocommerce-Button button wp-element-button"><?= ucwords( esc_html__( 'add new customer', VCPL_TEXT_DOMAIN ) ); ?></a>
+        <a href="<?= esc_url( add_query_arg( array( 'action' => 'add_user' ) ) ); ?>" class="woocommerce-Button button wp-element-button"><?= ucwords( esc_html__( 'add new customer', VCPL_TEXT_DOMAIN ) ); ?></a>
       </h2>
       <table class="woocommerce-orders-table woocommerce-MyAccount-orders shop_table shop_table_responsive my_account_orders account-orders-table">
         <thead>

@@ -78,7 +78,20 @@ abstract class VCPL_Admin_List_Table_User extends \WP_List_Table
     global $plugin_page;
 
     if ( ! empty( $post_action ) && $post_action === "delete" && ! empty( $post_ids ) ) {
-      wp_redirect( admin_url( "admin.php?page={$plugin_page}&action=delete_user&user_id=" . implode( ',', $post_ids ) ) );
+      $post_ids = array_values( array_filter( array_map( 'intval', (array) $post_ids ) ) );
+
+      if ( empty( $post_ids ) ) {
+        return array();
+      }
+
+      foreach ( $post_ids as $post_id ) {
+        if ( ! current_user_can( 'delete_user', $post_id ) ) {
+          wp_die( esc_html__( 'You are not allowed to delete one or more selected users.', VCPL_TEXT_DOMAIN ) );
+        }
+      }
+
+      wp_safe_redirect( admin_url( "admin.php?page={$plugin_page}&action=delete_user&user_id=" . implode( ',', $post_ids ) ) );
+      exit;
     }
 
     $like_clauses = array_map( fn( $role ) => "meta_value LIKE '%%" . $wpdb->esc_like( $role ) . "%%'", $this->roles );
